@@ -336,7 +336,9 @@ class NamespaceFS {
              * @returns {Promise<void>}
              */
             const process_dir = async dir_key => {
-
+                if (this._skip_version_dir(dir_key)) {
+                    return;
+                }
                 // /** @type {fs.Dir} */
                 let dir_handle;
 
@@ -1758,6 +1760,11 @@ class NamespaceFS {
         if (!version_format.test(v_parts[1]) || !version_format.test(v_parts[3])) {
             throw new RpcError('BAD_REQUEST', 'Bad Request');
         }
+    }
+
+    _skip_version_dir(dir_key) {
+        const idx = dir_key.indexOf(HIDDEN_VERSIONS_PATH)
+        return  (idx === 0) || (idx > 0 && dir_key[idx-1] === '/');
     }
 }
 
