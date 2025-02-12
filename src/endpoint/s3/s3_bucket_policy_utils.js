@@ -269,7 +269,12 @@ async function validate_s3_policy(policy, bucket_name, get_account_handler) {
         }
         for (const resource of _.flatten([statement.Resource || statement.NotResource])) {
             const resource_bucket_part = resource.split('/')[0];
-            const resource_regex = RegExp(`^${resource_bucket_part.replace(qm_regex, '.?').replace(ar_regex, '.*')}$`);
+            const resource_regex = RegExp(
+                `^${resource_bucket_part
+                .replace(/[-/^$+?.()|[\]{}]/g, '\\$&')
+                .replace(qm_regex, '.?')
+                .replace(ar_regex, '.*')}$`
+            );
             if (!resource_regex.test('arn:aws:s3:::' + bucket_name)) {
                 throw new RpcError('MALFORMED_POLICY', 'Policy has invalid resource', { detail: resource });
             }
